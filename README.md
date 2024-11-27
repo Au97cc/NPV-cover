@@ -5,6 +5,6 @@ We also provide MATLAB code and the final inversion model, which can be modified
 
 The GEE link is provided below to run and generate NPV Cover maps for the research area of the article.
 
-Sentinel-2: https://code.earthengine.google.com/b840c76fb46f47d2676bd0853e506e9a
+Sentinel-2: https://code.earthengine.google.com/ca612c743c6ccd00e0f33705ea44d90a
 
-Landsat-8: https://code.earthengine.google.com/d8c765b324787b28d8e37bdc32033554
+Landsat-8: https://code.earthengine.google.com/7bb40587d806c53648860df69a7d905a
