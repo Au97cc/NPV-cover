@@ -1,0 +1,287 @@
+load("slp.mat");
+f=readmatrix("E:\研究内容\建模\vi.xlsx","Range","A2:I161");
+fsoil=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","土壤属性","Range","E2:H161");
+fsar=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","S1-降轨","Range","C2:D161");
+vi=f(:,1:8);
+npv=f(:,9);
+vslp=cat(2,vi,slp);
+vslpsoil=cat(2,vslp,fsoil);
+vsoil=cat(2,vi,fsoil);
+vsar=cat(2,vi,fsar);
+vsarvi=cat(2,vi,SARvi);
+vslpsar=cat(2,vslp,fsar);
+result11=[];result21=[];
+result31=[];result41=[];
+result51=[];result61=[];
+result71=[];result81=[];
+ytfit1=[];ytest1=[];
+ytfit2=[];ytest2=[];
+ytfit3=[];ytest3=[];
+ytfit4=[];ytest4=[];
+ytfit5=[];ytest5=[];
+ytfit6=[];ytest6=[];
+ytfit7=[];ytest7=[];
+ytfit8=[];ytest8=[];
+A = cell(8,10);
+for i=1:10
+    [result1,b1,yft1,yt1] = RF_reg(5,vi,npv);%8个指数
+    [result2,b2,yft2,yt2] = RF_reg(5,vslp,npv);%8个指数+3个斜率
+    [result3,b3,yft3,yt3] = RF_reg(5,vslp(:,[3,5,7,8,9]),npv);%特征重要性排序后选5个特征
+    [result4,b4,yft4,yt4] = RF_reg(5,vslp(:,[3,7,8,9,10]),npv);%F-test 特征选择
+    [result5,b5,yft5,yt5] = RF_reg(5,vslpsoil,npv);%8个指数+3个斜率+土壤属性
+    [result6,b6,yft6,yt6] = RF_reg(5,vslpsar,npv);%8个指数+3个斜率+SAR
+    [result7,b7,yft7,yt7] = RF_reg(5,vsoil,npv);%8个指数+土壤属性
+    [result8,b8,yft8,yt8] = RF_reg(5,vsar,npv);%8个指数+SAR
+    result11=cat(1,result11,result1);
+    result21=cat(1,result21,result2);
+    result31=cat(1,result31,result3);
+    result41=cat(1,result41,result4);
+    result51=cat(1,result51,result5);
+    result61=cat(1,result61,result6);
+    result71=cat(1,result71,result7);
+    result81=cat(1,result81,result8);
+    ytfit1=cat(2,ytfit1,yft1);ytest1=cat(2,ytest1,yt1);
+    ytfit2=cat(2,ytfit2,yft2);ytest2=cat(2,ytest2,yt2);
+    ytfit3=cat(2,ytfit3,yft3);ytest3=cat(2,ytest3,yt3);
+    ytfit4=cat(2,ytfit4,yft4);ytest4=cat(2,ytest4,yt4);
+    ytfit5=cat(2,ytfit5,yft5);ytest5=cat(2,ytest5,yt5);
+    ytfit6=cat(2,ytfit6,yft6);ytest6=cat(2,ytest6,yt6);
+    ytfit7=cat(2,ytfit7,yft7);ytest7=cat(2,ytest7,yt7);
+    ytfit8=cat(2,ytfit8,yft8);ytest8=cat(2,ytest8,yt8);
+    A{1,i}=b1;A{2,i}=b2;A{3,i}=b3;A{4,i}=b4;A{5,i}=b5;A{6,i}=b6;A{7,i}=b7;A{8,i}=b8;
+end
+res=cat(2,result11,result21,result31,result41,result51,result61,result71,result81);
+resm=mean(res);
+%%
+[m1,idx1]=max(result11(:,5));resmax(1,:)=result11(idx1,:);
+[m2,idx2]=max(result21(:,5));resmax(2,:)=result21(idx2,:);
+[m3,idx3]=max(result31(:,5));resmax(3,:)=result31(idx3,:);
+[m4,idx4]=max(result41(:,5));resmax(4,:)=result41(idx4,:);
+[m5,idx5]=max(result51(:,5));resmax(5,:)=result51(idx5,:);
+[m6,idx6]=max(result61(:,5));resmax(6,:)=result61(idx6,:);
+[m7,idx7]=max(result71(:,5));resmax(7,:)=result51(idx7,:);
+[m8,idx8]=max(result81(:,5));resmax(8,:)=result61(idx8,:);
+%%
+R2=roundn(R2,-2);
+t = tiledlayout(3,3,'TileSpacing','compact');
+nexttile
+plot(ytrain1(:,idx1),yfit1(:,idx1),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+legend('train','1:1 Line','Location','northwest');txt=['R2=',num2str(R2(1,1))];text(0.75,0.1,txt);set(gca,'xticklabel',[])
+nexttile
+plot(ytest1(:,idxt1),ytfit1(:,idxt1),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+legend('test','1:1 Line','Location','northwest');txt=['R2=',num2str(R2(1,2))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);set(gca,'yticklabel',[])
+
+%
+nexttile
+plot(ytrain2(:,idx2),yfit2(:,idx2),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(2,1))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);
+nexttile
+plot(ytest2(:,idxt2),ytfit2(:,idxt2),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(2,2))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);set(gca,'yticklabel',[]);
+%
+nexttile
+plot(ytrain3(:,idx3),yfit3(:,idx3),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(3,1))];text(0.75,0.1,txt);
+nexttile
+plot(ytest3(:,idxt3),ytfit3(:,idxt3),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(3,2))];text(0.75,0.1,txt);set(gca,'yticklabel',[]);
+%
+xlabel(t,'实测值');ylabel(t,'预测值');
+%%
+figure;
+t = tiledlayout(3,2,'TileSpacing','compact');
+nexttile
+plot(ytrain4(:,idx4),yfit4(:,idx4),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+legend('train','1:1 Line','Location','northwest');txt=['R2=',num2str(R2(4,1))];text(0.75,0.1,txt);set(gca,'xticklabel',[])
+nexttile
+plot(ytest4(:,idxt4),ytfit4(:,idxt4),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+legend('test','1:1 Line','Location','northwest');txt=['R2=',num2str(R2(4,2))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);set(gca,'yticklabel',[])
+%
+nexttile
+plot(ytrain5(:,idx5),yfit5(:,idx5),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(5,1))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);
+nexttile
+plot(ytest5(:,idxt5),ytfit5(:,idxt5),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(5,2))];text(0.75,0.1,txt);set(gca,'xticklabel',[]);set(gca,'yticklabel',[]);
+%
+nexttile
+plot(ytrain6(:,idx6),yfit6(:,idx6),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(6,1))];text(0.75,0.1,txt);
+nexttile
+plot(ytest6(:,idxt6),ytfit6(:,idxt6),'+')
+hold on;
+plot([0,1],[0,1],'r-')
+txt=['R2=',num2str(R2(6,2))];text(0.75,0.1,txt);set(gca,'yticklabel',[]);
+%
+xlabel(t,'实测值');ylabel(t,'预测值');
+
+%% Number of Leaves and Trees Optimization
+for RFOptimizationNum=1:5
+RFLeaf=[5,10,20,50,100,200,500];
+col='rgbcmyk';
+figure('Name','RF Leaves and Trees');
+for i=1:length(RFLeaf)
+    RFModel=TreeBagger(2000,vi,npv,'Method','R','OOBPrediction','On','MinLeafSize',RFLeaf(i));
+    plot(oobError(RFModel),col(i));
+    hold on
+end
+xlabel('Number of Grown Trees');
+ylabel('Mean Squared Error') ;
+LeafTreelgd=legend({'5' '10' '20' '50' '100' '200' '500'},'Location','NorthEast');
+title(LeafTreelgd,'Number of Leaves');
+hold off;
+disp(RFOptimizationNum);
+end
+% 5 200
+%% Calculate the relative importance of the input variables
+weights=A{3}.OOBPermutedVarDeltaError;
+[B,iranked] = sort(weights,'descend');
+figure
+barh(weights(iranked),'g');
+xlabel('Variable Importance','FontSize',30,'Interpreter','latex');
+ylabel('Variable Rank','FontSize',30,'Interpreter','latex');
+title(...
+    ['Relative Importance of Inputs in estimating Redshift'],...
+    'FontSize',17,'Interpreter','latex'...
+    );
+hold on
+barh(weights(iranked(1:10)),'y');
+barh(weights(iranked(1:5)),'r');
+% Add text labels to each bar
+for ii=1:length(weights)
+    text(...
+        max([0 weights(iranked(ii))+0.02*max(weights)]),ii,...
+        ['Column ' num2str(iranked(ii))],'Interpreter','latex','FontSize',11);
+end
+%%
+% -------------------------------------------------------------------------
+% Ploting how weights change with variable rank
+disp('Ploting out of bag error versus the number of grown trees')
+
+figure
+plot(b.oobError,'LineWidth',2);
+xlabel('Number of Trees','FontSize',30)
+ylabel('Out of Bag Error','FontSize',30)
+title('Out of Bag Error','FontSize',30)
+set(gca,'FontSize',16)
+set(gca,'LineWidth',2);   
+grid on
+drawnow
+fn='EroorAsFunctionOfForestSize';
+fnpng=[fn,'.png'];
+print('-dpng',fnpng);
+
+%% RF all
+% 土壤：土壤属性-SOC SND SLT CLY
+% 土壤类型-澳大利亚土壤共14个类别，采样点土壤共8个类别，土壤类型使用独热编码进行编码，避免机器学习中认为类别是数值进行计算
+% 雷达：VV VH 以及由二者构建的指数
+% 1-11 指数 12-21 SAR 22-25 土壤属性 26-33 土壤类型
+vi_all=readmatrix("E:\研究内容\建模\vi_11.xlsx");
+[row,col]=size(vi_all);
+npv=readmatrix("E:\研究内容\建模\NPV.xlsx","Range","C2:C161");
+SAR=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","S1-降轨","Range","C2:P161");  
+SAR(:,[3,4,5,6])=[];
+fsoil=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","土壤属性","Range","E2:H161");
+sccode=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","土壤类型","Range","C3:J162");
+xall=cat(2,vi_all,SAR,fsoil,sccode);
+
+% 训练随机森林，TreeBagger使用内容，以及设置随机森林参数
+         leaf = 5;
+         ntrees = 200;
+         fboot = 1;   
+         A = TreeBagger(ntrees, xall,npv, 'Method','regression', 'oobvarimp','on', 'surrogate', 'on', 'minleaf',leaf,'FBoot',fboot);
+% 使用训练好的模型进行预测 
+         %测试集
+         yfit = predict(A, xall);
+         result(1)=1-sum((npv-yfit).^2)/sum((npv-mean(npv)).^2);
+         result(2)=rmse(yfit,npv);
+         result(3)=result(1)/mean(npv);
+         result(4)=mean(abs(yfit-npv)); 
+         result(5)=mean(npv-yfit);
+%%
+%每折重要性排序
+weights=A.OOBPermutedVarDeltaError;
+[B,iranked] = sort(weights,'descend');
+barh(weights(iranked),'g');
+hold on
+barh(weights(iranked(1:10)),'y');
+barh(weights(iranked(1:5)),'r');
+% Add text labels to each bar
+for ii=1:length(weights)
+    text(...
+        max([0 weights(iranked(ii))+0.02*max(weights)]),ii,...
+        [num2str(iranked(ii))],'Interpreter','latex','FontSize',10);
+end
+weights=A.OOBPermutedVarDeltaError;
+[B,iranked] = sort(weights,'descend');
+xlabel('Variable Importance');
+ylabel('Variable Rank');
+%%
+%多重共线性 方差膨胀因子VIF
+vi_all=readmatrix("E:\研究内容\建模\vi_11.xlsx");
+SAR=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","S1-降轨","Range","C2:P161");  
+SAR(:,[3,4,5,6])=[];
+fsoil=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","土壤属性","Range","E2:H161");
+sccode=readmatrix("E:\研究内容\采样点\2019NT整理.xlsx","Sheet","土壤类型","Range","C3:J162");
+xall=cat(2,vi_all,SAR,fsoil,sccode);
+npv=readmatrix("E:\研究内容\建模\NPV.xlsx","Range","C2:C161");
+mdl=fitlm(xall,npv);
+vif=zeros(1,size(xall,2));
+A=cell(33,1);
+for i=1:size(xall,2)
+    A{i}=xall;
+    A{i}(:,i)=[];
+    mdl=fitlm(A{i},xall(:,i));
+    vif(i)=1/(1-mdl.Rsquared.Ordinary);
+end
+
+%%
+%全部特征
+xall(:,9)=[];
+result11=[];
+ytfit1=[];ytest1=[];
+A = cell(1,10);
+for i=1:10
+    [result1,b1,yft1,yt1] = RF_reg(5,xall,npv);
+    result11=cat(1,result11,result1);
+    ytfit1=cat(2,ytfit1,yft1);ytest1=cat(2,ytest1,yt1);
+    A{1,i}=b1;
+end
+resm=mean(result11);
+%%
+%特征选择MRMR
+for i=1:10
+    x(:,i)=xall(:,fc(1,i));
+end
+result11=[];
+ytfit1=[];ytest1=[];
+A = cell(1,10);
+for i=1:10
+    [result1,b1,yft1,yt1] = RF_reg(5,x,npv);
+    result11=cat(1,result11,result1);
+    ytfit1=cat(2,ytfit1,yft1);ytest1=cat(2,ytest1,yt1);
+    A{1,i}=b1;
+end
+resm=mean(result11);
